@@ -33,11 +33,15 @@ public class Puffer {
      * Gibt die Sequenznummer des nächsten zu sendenden Pakets zurück
      * @return Sequenznummer des nächsten zu sendenden Pakets
      */
-    public synchronized long getNextSeqNum(){
+    public synchronized int getNextSeqNum(){
         //Todo: NextSeqNum zurückgeben
         throw new Error("Not implemented yet!");
     }
     
+      public synchronized FCpacket getPackageForSeqNum(long seqNum){
+        //Todo: NextSeqNum zurückgeben
+        throw new Error("Not implemented yet!");
+    }
     
     
     

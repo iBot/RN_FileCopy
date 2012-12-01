@@ -8,6 +8,8 @@ package src;
 
 import java.io.*;
 import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileCopyClient extends Thread {
 
@@ -17,6 +19,8 @@ public class FileCopyClient extends Thread {
   public final int SERVER_PORT = 23000;
 
   public final int UDP_PACKET_SIZE = 1024;
+  
+  private final double X = 0.1;
 
   // -------- Public parms
   public String servername;
@@ -33,10 +37,19 @@ public class FileCopyClient extends Thread {
   // current default timeout in nanoseconds
   private long timeoutValue = 100000000;
   
+  private long deviation =0;
+  
+  private long estimatedRTT = 0;
+  
   private Puffer sendePuffer; 
+  
+  private UDPSender sender;
 
   // ... ToDo
 
+  
+  // -------- Streams
+  private FileInputStream inFromFile;
 
   // Constructor
   public FileCopyClient(String serverArg, String sourcePathArg,
@@ -47,15 +60,57 @@ public class FileCopyClient extends Thread {
     windowSize = windowSizeArg;
     serverErrorRate = errorRateArg;
     sendePuffer = new Puffer(windowSize);
+        try {
+            inFromFile = new FileInputStream(sourcePath);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex.getStackTrace());
+        }
 
   }
 
   public void runFileCopyClient() {
 
       // ToDo!!
+     //Kontroll Paket senden
+      FCpacket contFCpacket = makeControlPacket();
+      sendPackage(contFCpacket);
+      
+      
+      
 
+      
 
   }
+  
+  
+    private void sendPackage(FCpacket fcp){
+        fcp.setTimestamp(System.currentTimeMillis());
+        fcp.setTimer(new FC_Timer(timeoutValue, this, fcp.getSeqNum()));
+        sender.sendPackage(fcp);
+    }
+
+  
+  private FCpacket getNextPackage(long seqNum){
+      
+      byte[] packetData = readFromFile(seqNum);
+      
+      
+      
+      FCpacket result = new FCpacket(seqNum,packetData, 1024);
+      return result;
+  }
+  
+     private byte[] readFromFile(long seqNum){
+        byte[] data = new byte[UDP_PACKET_SIZE];
+        try {
+            inFromFile.read(data, (int)seqNum, UDP_PACKET_SIZE);
+        } catch (IOException ex) {
+            Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
+             System.err.println(ex.getStackTrace());
+        }
+        return data;
+    }
 
   /**
   *
@@ -81,9 +136,11 @@ public class FileCopyClient extends Thread {
    * Implementation specific task performed at timeout
    */
   public void timeoutTask(long seqNum) {
-      
-  // ToDo
+      FCpacket fcp = sendePuffer.getPackageForSeqNum(seqNum);
+      sendPackage(fcp);
   }
+  
+
 
 
   /**
@@ -91,10 +148,13 @@ public class FileCopyClient extends Thread {
    * Computes the current timeout value (in nanoseconds)
    */
   public void computeTimeoutValue(long sampleRTT) {
-
-  // ToDo
+        timeoutValue = estimatedRTT + 4 * computeDeviation(sampleRTT);
   }
 
+    private long computeDeviation(long smapleRTT){
+        deviation = new Double((1-X)*deviation + X*Math.abs(smapleRTT-estimatedRTT)).longValue();
+        return deviation;
+    }
 
   /**
    *
@@ -150,5 +210,8 @@ public class FileCopyClient extends Thread {
     FileCopyClient myClient = new FileCopyClient(hostname, fileSource, fileTarget, windowsSize, errorLevel);
     myClient.runFileCopyClient();
   }
+
+
+
 
 }
