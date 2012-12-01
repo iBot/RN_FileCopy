@@ -33,7 +33,7 @@ public class FileCopyClient extends Thread {
   // current default timeout in nanoseconds
   private long timeoutValue = 100000000;
   
-  
+  private Puffer sendePuffer; 
 
   // ... ToDo
 
@@ -46,6 +46,7 @@ public class FileCopyClient extends Thread {
     destPath = destPathArg;
     windowSize = windowSizeArg;
     serverErrorRate = errorRateArg;
+    sendePuffer = new Puffer(windowSize);
 
   }
 
