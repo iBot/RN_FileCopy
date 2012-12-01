@@ -4,3 +4,5 @@
 *.jar
 *.war
 *.ear
+/Client/FC-Client/nbproject/private/
+/Server/FC-Server/nbproject/private/
