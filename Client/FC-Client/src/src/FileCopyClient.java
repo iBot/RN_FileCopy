@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class FileCopyClient extends Thread {
 
     // -------- Constants
-    public final static boolean TEST_OUTPUT_MODE = false;
+    public final static boolean TEST_OUTPUT_MODE = true;
     public final int SERVER_PORT = 23000;
     public final int UDP_PACKET_SIZE = 1024;
     private final double X = 0.1;
@@ -68,7 +68,7 @@ public class FileCopyClient extends Thread {
 
         sendePuffer = new Puffer(windowSize, this);
         //sendePuffer.start();
-        
+
         this.receiver = new UDPReceiver(sendePuffer);
         receiver.start();
 
@@ -97,9 +97,9 @@ public class FileCopyClient extends Thread {
     }
 
     private void sendPackage(FCpacket fcp) {
-        fcp.setTimestamp(System.currentTimeMillis()*1000);
+        fcp.setTimestamp(System.currentTimeMillis() * 1000);
         fcp.setTimer(new FC_Timer(timeoutValue, this, fcp.getSeqNum()));
-        sender.sendPackage(fcp,servername,SERVER_PORT);
+        sender.sendPackage(fcp, servername, SERVER_PORT);
     }
 
     private FCpacket getNextPackage(long seqNum) {
@@ -119,11 +119,12 @@ public class FileCopyClient extends Thread {
         byte[] data = new byte[UDP_PACKET_SIZE];
         int nextByte = -2;
         try {
-            System.out.println("seqNum: "+ seqNum);
-            System.out.println("udp-pack-length: "+UDP_PACKET_SIZE);
+            System.out.println("data.length: " + data.length);
+            System.out.println("seqNum: " + seqNum);
+            System.out.println("udp-pack-length: " + UDP_PACKET_SIZE);
+
+            nextByte = inFromFile.read(data);
             System.out.println(Arrays.toString(data));
-            nextByte = inFromFile.read(data, (int) seqNum, UDP_PACKET_SIZE);
-          
         } catch (IOException ex) {
             Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println(ex.getStackTrace());
@@ -177,7 +178,7 @@ public class FileCopyClient extends Thread {
      * @param sampleRTT
      */
     public void computeTimeoutValue(long sampleRTT) {
-        estimatedRTT = new Double((1-X)*estimatedRTT + X*sampleRTT).longValue();
+        estimatedRTT = new Double((1 - X) * estimatedRTT + X * sampleRTT).longValue();
         timeoutValue = estimatedRTT + (4 * computeDeviation(sampleRTT));
     }
 
@@ -233,6 +234,7 @@ public class FileCopyClient extends Thread {
 
         //Variablen setzen
         try {
+            System.out.println(Arrays.toString(argv));
             hostname = argv[0];
             fileSource = argv[1];
             fileTarget = argv[2];

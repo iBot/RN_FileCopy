@@ -42,7 +42,7 @@ public class UDPSender {
         try {
             /* Paket erzeugen */
             DatagramPacket sendPacket =
-                    new DatagramPacket(fcPacket.getData(), fcPacket.getLen(), serverIpAddress, serverPort);
+                    new DatagramPacket(fcPacket.getSeqNumBytesAndData(), fcPacket.getLen(), serverIpAddress, serverPort);
             
 
             /* Senden des Pakets */
