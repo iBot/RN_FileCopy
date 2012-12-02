@@ -67,12 +67,12 @@ public class FileCopyClient extends Thread {
      */
     private void runFileCopyClient() {
 
-        this.receiver = new UDPReceiver(new ArrayBlockingQueue<String>(windowSize));
-
         sendePuffer = new Puffer(windowSize, this);
         //sendePuffer.start();
-        //this.receiver = new UDPReceiver(new ArrayBlockingQueue<String>(windowSize), sendePuffer);
-        //receiver.start();
+        
+        this.receiver = new UDPReceiver(sendePuffer);
+        receiver.start();
+
 
         // ToDo!!
         //Kontroll Paket senden
@@ -99,7 +99,7 @@ public class FileCopyClient extends Thread {
     private void sendPackage(FCpacket fcp) {
         fcp.setTimestamp(System.currentTimeMillis());
         fcp.setTimer(new FC_Timer(timeoutValue, this, fcp.getSeqNum()));
-        sender.sendPackage(fcp);
+        sender.sendPackage(fcp,servername,SERVER_PORT);
     }
 
     private FCpacket getNextPackage(long seqNum) {

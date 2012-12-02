@@ -7,39 +7,37 @@ package src;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.concurrent.BlockingQueue;
+import java.nio.ByteBuffer;
 
 /**
  *
- * @author Tobi
+ * @author Ned
  */
+public class UDPReceiver extends Thread {
 
-
-
-
-public class UDPReceiver {
-    
-    private static final int BUFFER_SIZE = 123;
+    private static final int BUFFER_SIZE = 8;
     private DatagramSocket clientSocket;  // UDP-Socketklasse
-    private final BlockingQueue<String> messageQueue;
     private boolean serviceRequested = true;
-    
-    public UDPReceiver(BlockingQueue<String> messageQueue) {
-        this.messageQueue = messageQueue;
-        startJob();
+    private long seqNumber;
+    private Puffer puffer;
+
+    public UDPReceiver(Puffer puffer) {
+        this.puffer = puffer;
     }
-    
-    private void startJob() {
+
+    @Override
+    public void run() {
         try {
+
+            System.out.println("UDP Reciver Thread is running until all Ack's Packets are received!");
+
             /* UDP-Socket erzeugen (kein Verbindungsaufbau!)
              * Socket wird an irgendeinen freien (Quell-)Port gebunden, da kein Port angegeben */
             this.clientSocket = new DatagramSocket();
 
-            String message;
-
             while (serviceRequested) {
-                message = readFromServer();
-                this.messageQueue.add(message);
+                seqNumber = readAckFromServer();
+                puffer.ackPackage(seqNumber);
             }
 
             /* Socket schließen (freigeben)*/
@@ -48,32 +46,36 @@ public class UDPReceiver {
             System.err.println(e.toString());
             System.exit(1);
         }
-        System.out.println("UDP Client stopped!");
+        System.out.println("UDP Reciver Thread stopped!\n last Ack Packet has this Sequence Number: " + seqNumber);
     }
-    
+
     public void stopJob() {
         this.serviceRequested = false;
     }
 
-    private String readFromServer() {
-        /* Liefere den nächsten String vom Server */
-        String receiveString = "";
+    private long readAckFromServer() {
 
         try {
             /* Paket für den Empfang erzeugen */
             byte[] receiveData = new byte[BUFFER_SIZE];
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, BUFFER_SIZE);
+            DatagramPacket receiveAckPacket = new DatagramPacket(receiveData, BUFFER_SIZE);
 
             /* Warte auf Empfang des Antwort-Pakets auf dem eigenen Port */
-            clientSocket.receive(receivePacket);
+            clientSocket.receive(receiveAckPacket);
 
             /* Paket wurde empfangen --> auspacken und Inhalt anzeigen */
-            receiveString = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            this.seqNumber = bytearray2long(receiveAckPacket.getData());
+
         } catch (IOException e) {
             System.err.println("Connection aborted by server!");
             serviceRequested = false;
         }
-        System.out.println("UDP Client got from Server: " + receiveString);
-        return receiveString;
+        System.out.println("UDP Client got from Server: Packet with the number " + seqNumber + " recived successfully");
+        return seqNumber;
+    }
+
+    private static long bytearray2long(byte[] b) {
+        ByteBuffer buf = ByteBuffer.wrap(b);
+        return buf.getLong();
     }
 }
