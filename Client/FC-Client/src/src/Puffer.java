@@ -17,16 +17,15 @@ public class Puffer extends Thread {
     private SortedSet<FCpacket> puffer;
     private final int pufferSize;
     private final FileCopyClient producer;
-    private final UDPReceiver consumer;
+    //private final UDPReceiver consumer;
 
     /**
      * Erstellt einen neuen Puffer
      *
      * @param pufferSize
      */
-    public Puffer(int pufferSize, FileCopyClient producer, UDPReceiver consumer) {
+    public Puffer(int pufferSize, FileCopyClient producer) {
         this.producer = producer;
-        this.consumer = consumer;
         this.pufferSize = pufferSize;
         this.puffer = new TreeSet<>();
     }

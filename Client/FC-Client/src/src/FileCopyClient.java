@@ -68,8 +68,9 @@ public class FileCopyClient extends Thread {
         
         this.receiver = new UDPReceiver(new ArrayBlockingQueue<String>(windowSize));
         
-        sendePuffer = new Puffer(windowSize, this, receiver);
+        sendePuffer = new Puffer(windowSize, this);
         sendePuffer.start();
+        //this.receiver = new UDPReceiver(new ArrayBlockingQueue<String>(windowSize), sendePuffer);
         //receiver.start();
 
         // ToDo!!
