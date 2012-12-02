@@ -12,7 +12,7 @@ import java.util.TreeSet;
  *
  * @author Tobi
  */
-public class Puffer extends Thread {
+public class Puffer{
 
     private SortedSet<FCpacket> puffer;
     private final int pufferSize;
@@ -30,12 +30,25 @@ public class Puffer extends Thread {
         this.puffer = new TreeSet<>();
     }
 
-    @Override
-    public void run() {
+//    @Override
+//    public void run() {
+//        while (!interrupted()){
+//            if (puffer.first().isValidACK()) {
+//                puffer.remove(puffer.first());
+//            }
+//        }
+//    }
+    
+    public synchronized FCpacket getFirst(){
+        return puffer.first();
     }
     
-    public synchronized  void ackPackage(long seqNumber){
-        throw new Error("Not implemented yet");
+    public synchronized void removeFirst(){
+        puffer.remove(puffer.first());
+    }
+    
+    public synchronized void ackPackage(long seqNumber){
+        getPackageForSeqNum(seqNumber).setValidACK(true);
     }
 
     /**
@@ -45,6 +58,10 @@ public class Puffer extends Thread {
      */
     public synchronized long getSendbase() {
         return puffer.first().getSeqNum();
+    }
+    
+    public synchronized boolean isFull(){
+        return pufferSize<puffer.size();
     }
 
     /**
