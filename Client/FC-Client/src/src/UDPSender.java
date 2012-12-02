@@ -21,7 +21,7 @@ public class UDPSender {
         try {
             /* UDP-Socket erzeugen (kein Verbindungsaufbau!)
              * Socket wird an irgendeinen freien (Quell-)Port gebunden, da kein Port angegeben */
-            clientSocket = new DatagramSocket();
+            clientSocket = new DatagramSocket(60000, InetAddress.getByName("127.0.0.1"));
             serverIpAddress = InetAddress.getByName(serverName); // Zieladresse
             this.serverPort = serverPort;
 
@@ -43,6 +43,7 @@ public class UDPSender {
             /* Paket erzeugen */
             DatagramPacket sendPacket =
                     new DatagramPacket(fcPacket.getData(), fcPacket.getLen(), serverIpAddress, serverPort);
+            
 
             /* Senden des Pakets */
             clientSocket.send(sendPacket);

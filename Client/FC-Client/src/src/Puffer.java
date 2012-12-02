@@ -12,7 +12,7 @@ import java.util.TreeSet;
  *
  * @author Tobi
  */
-public class Puffer{
+public class Puffer {
 
     private SortedSet<FCpacket> puffer;
     private final int pufferSize;
@@ -38,17 +38,25 @@ public class Puffer{
 //            }
 //        }
 //    }
-    
-    public synchronized FCpacket getFirst(){
+    public synchronized FCpacket getFirst() {
         return puffer.first();
     }
-    
-    public synchronized void removeFirst(){
+
+    public synchronized void removeFirst() {
         puffer.remove(puffer.first());
     }
-    
-    public synchronized void ackPackage(long seqNumber){
-        getPackageForSeqNum(seqNumber).setValidACK(true);
+
+    public synchronized void ackPackage(long seqNumber) {
+        FCpacket fcp = getPackageForSeqNum(seqNumber);
+        if (fcp != null) {
+            fcp.setValidACK(true);
+            producer.cancelTimer(fcp);
+            producer.computeTimeoutValue(System.currentTimeMillis()*1000-fcp.getTimestamp());
+            while(getFirst().isValidACK()){
+                removeFirst();
+            }
+        }
+
     }
 
     /**
@@ -59,9 +67,9 @@ public class Puffer{
     public synchronized long getSendbase() {
         return puffer.first().getSeqNum();
     }
-    
-    public synchronized boolean isFull(){
-        return pufferSize<puffer.size();
+
+    public synchronized boolean isFull() {
+        return pufferSize < puffer.size();
     }
 
     /**
@@ -71,6 +79,7 @@ public class Puffer{
      */
     public synchronized long getNextSeqNum() {
         FCpacket last = puffer.last();
+        System.out.println("NextSeqNum = "+(last.getSeqNum() + last.getLen()));
         return last.getSeqNum() + last.getLen();
     }
 
@@ -81,12 +90,11 @@ public class Puffer{
                 result = fCpacket;
             }
         }
+        
         return result;
     }
 
     public synchronized void insert(FCpacket newPackage) {
         puffer.add(newPackage);
-        if (puffer.size() == pufferSize) {
-        }
     }
 }

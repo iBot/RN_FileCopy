@@ -125,6 +125,7 @@ public class FileCopyServer {
 				}
 			} catch (java.net.SocketTimeoutException e) {
 				// Copy job successfully finished
+                                System.out.println(outToFile);
 				outToFile.close();
 				connectionEstablished = false;
 				System.out.println("Connection successfully closed, file "
@@ -133,6 +134,7 @@ public class FileCopyServer {
 				serverSocket.setSoTimeout(0);
 				System.out.println("Waiting for connection using port  "
 						+ SERVER_PORT);
+                               
 			} catch (IOException e) {
 				System.err.println("XXXXXXXXXXXXXXX File Error: " + destPath);
 				break;
