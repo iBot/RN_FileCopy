@@ -5,6 +5,7 @@
 package src;
 
 import erzVerbrMonitore.Producer;
+import java.io.IOException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -68,7 +69,7 @@ public class Puffer {
         return puffer.first().getSeqNum();
     }
 
-    public synchronized boolean isFull() {
+    public synchronized boolean isFull(){
         return pufferSize < puffer.size();
     }
 

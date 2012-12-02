@@ -8,6 +8,7 @@ package src;
 
 import java.io.*;
 import java.net.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -209,6 +210,7 @@ public class FileCopyServer {
 
 		// Extract parameters
 		parameterArray = parameters.split(";");
+                System.out.println(parameters);
 
 		if (parameterArray.length == 3) {
 			// Adjust parameters

@@ -83,16 +83,18 @@ public class FileCopyClient extends Thread {
 
         FCpacket nextPackage = getNextPackage(0);
         while (!finish) {
-            if (!sendePuffer.isFull()) {
-                while (nextPackage != null) {
+            while (nextPackage != null) {
+                if (!sendePuffer.isFull()) {
                     sendePuffer.insert(nextPackage);
                     sendPackage(nextPackage);
                     nextPackage = getNextPackage(sendePuffer.getNextSeqNum());
+                    finish = false;
+                } else {
+                    finish = true;
+                    break;
                 }
-                finish = false;
-            } else {
-                finish = true;
             }
+
         }
     }
 

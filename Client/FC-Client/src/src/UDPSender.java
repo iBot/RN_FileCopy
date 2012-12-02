@@ -28,7 +28,7 @@ public class UDPSender {
             System.out.println("Sending Packet with Sequence Number " + fcp.getSeqNum());
             /* Sende den String als UDP-Paket zum Server */
             writeToServer(fcp);
-
+            //System.out.println("DATA: "+new String(fcp.getData(), "UTF-8"));
             /* Socket schlie�en (freigeben)*/
             clientSocket.close();
         } catch (IOException e) {
