@@ -84,8 +84,6 @@ public class FileCopyClient extends Thread {
 
         sender = new UDPSender(clientSocket);
 
-        // ToDo!!
-        //Kontroll Paket senden
 
         FCpacket contFCpacket = makeControlPacket();
 
@@ -94,26 +92,26 @@ public class FileCopyClient extends Thread {
 
 
         FCpacket nextPackage = getNextPackage(1);
-        while (!finish) {
-            while (nextPackage != null) {
-                if (!sendePuffer.isFull()) {
-                    sendePuffer.insert(nextPackage);
-                    sendPackage(nextPackage);
-                    nextPackage = getNextPackage(sendePuffer.getNextSeqNum());
-                    finish = false;
-                } else {
-                    finish = true;
-                }
+        while (nextPackage != null) {
+            if (!sendePuffer.isFull()) {
+                sendePuffer.insert(nextPackage);
+                sendPackage(nextPackage);
+                nextPackage = getNextPackage(sendePuffer.getNextSeqNum());
             }
-
+            System.out.println("Next Package == null -> "+(nextPackage == null));
         }
-        System.err.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
-        //receiver.stopJob();
+        System.out.println("<<<ALLE PAKETE IM PUFFER>>>");
+        
+        while (!sendePuffer.isEmpty()){  
+        }
+        
+        receiver.stopJob();
     }
 
     private void sendPackage(FCpacket fcp) {
-        fcp.setTimestamp(System.currentTimeMillis() * 1000);
+        fcp.setTimestamp(System.currentTimeMillis() * 1000000);
         fcp.setTimer(new FC_Timer(timeoutValue, this, fcp.getSeqNum()));
+        startTimer(fcp);
         sender.sendPackage(fcp, servername, SERVER_PORT);
     }
 
@@ -195,7 +193,7 @@ public class FileCopyClient extends Thread {
     public void computeTimeoutValue(long sampleRTT) {
         estimatedRTT = new Double((1 - X) * estimatedRTT + X * sampleRTT).longValue();
         timeoutValue = estimatedRTT + (4 * computeDeviation(sampleRTT));
-        System.out.println(String.format("estimatedRTT:%d timeout: %d",estimatedRTT,timeoutValue));
+        System.out.println(String.format("estimatedRTT:%d timeout: %d", estimatedRTT, timeoutValue));
     }
 
     private long computeDeviation(long smapleRTT) {

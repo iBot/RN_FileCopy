@@ -214,5 +214,10 @@ public class FCpacket implements Comparable<FCpacket> {
 			source = source >>> 8;
 		}
 	}
+        
+        @Override
+        public String toString(){
+            return "FCP{" + seqNumber + "; " + validACK + "}" ;
+        }
 
 }

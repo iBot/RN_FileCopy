@@ -53,6 +53,7 @@ public class UDPReceiver extends Thread {
     }
 
     public void stopJob() {
+        System.out.println("UDP RECEIVER STOPPED");
         this.serviceRequested = false;
     }
 

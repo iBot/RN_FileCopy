@@ -4,8 +4,6 @@
  */
 package src;
 
-import erzVerbrMonitore.Producer;
-import java.io.IOException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -51,18 +49,22 @@ public class Puffer {
         
         FCpacket fcp = getPackageForSeqNum(seqNumber);
         System.out.println("--Ack: "+fcp.getSeqNum());
+        
         if (fcp != null) {
             fcp.setValidACK(true);
+            System.out.println("Puffer before; size : "+puffer.size()+" -> " + puffer);
             producer.cancelTimer(fcp);
-            producer.computeTimeoutValue(System.currentTimeMillis()*1000-fcp.getTimestamp());
+            producer.computeTimeoutValue(System.currentTimeMillis()*1000000-fcp.getTimestamp());
             System.out.print("---Delete from Buffer: ");
             while(getFirst().isValidACK()){
                 System.out.print(getFirst().getSeqNum()+"; ");
                 removeFirst();
             }
             System.out.println();
-            
+            System.out.println("Puffer after; size : "+puffer.size()+" -> " + puffer);
         }
+        
+        
         
 
     }
@@ -77,7 +79,7 @@ public class Puffer {
     }
 
     public synchronized boolean isFull(){
-        return pufferSize < puffer.size();
+        return puffer.size() >= pufferSize;
     }
 
     /**
@@ -87,8 +89,8 @@ public class Puffer {
      */
     public synchronized long getNextSeqNum() {
         FCpacket last = puffer.last();
-        System.out.println("NextSeqNum = "+(last.getSeqNum() + last.getLen()));
-        return last.getSeqNum() + last.getLen();
+        System.out.println("NextSeqNum = "+(last.getSeqNum() + 1));
+        return last.getSeqNum() + 1;
     }
 
     public synchronized FCpacket getPackageForSeqNum(long seqNum) {
@@ -104,5 +106,9 @@ public class Puffer {
 
     public synchronized void insert(FCpacket newPackage) {
         puffer.add(newPackage);
+    }
+
+    public synchronized boolean isEmpty() {
+        return puffer.isEmpty();
     }
 }
