@@ -7,6 +7,7 @@ package src;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 /**
@@ -21,31 +22,33 @@ public class UDPReceiver extends Thread {
     private long seqNumber;
     private Puffer puffer;
 
-    public UDPReceiver(Puffer puffer) {
+    public UDPReceiver(Puffer puffer, DatagramSocket clientSocket) {
         this.puffer = puffer;
+        this.clientSocket = clientSocket;
     }
 
     @Override
     public void run() {
-        try {
+//        try {
 
             System.out.println("UDP Reciver Thread is running until all Ack's Packets are received!");
 
             /* UDP-Socket erzeugen (kein Verbindungsaufbau!)
              * Socket wird an irgendeinen freien (Quell-)Port gebunden, da kein Port angegeben */
-            this.clientSocket = new DatagramSocket();
+            //this.clientSocket = new DatagramSocket(60000, InetAddress.getByName("127.0.0.1"));
 
             while (serviceRequested) {
                 seqNumber = readAckFromServer();
+                System.err.println("Received Ack for SeqNum: "+seqNumber);
                 puffer.ackPackage(seqNumber);
             }
 
             /* Socket schließen (freigeben)*/
             clientSocket.close();
-        } catch (IOException e) {
-            System.err.println(e.toString());
-            System.exit(1);
-        }
+//        } catch (IOException e) {
+//            System.err.println(e.toString());
+//            System.exit(1);
+//        }
         System.out.println("UDP Reciver Thread stopped!\n last Ack Packet has this Sequence Number: " + seqNumber);
     }
 

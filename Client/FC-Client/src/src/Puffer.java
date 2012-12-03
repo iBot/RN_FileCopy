@@ -48,15 +48,22 @@ public class Puffer {
     }
 
     public synchronized void ackPackage(long seqNumber) {
+        
         FCpacket fcp = getPackageForSeqNum(seqNumber);
+        System.out.println("--Ack: "+fcp.getSeqNum());
         if (fcp != null) {
             fcp.setValidACK(true);
             producer.cancelTimer(fcp);
             producer.computeTimeoutValue(System.currentTimeMillis()*1000-fcp.getTimestamp());
+            System.out.print("---Delete from Buffer: ");
             while(getFirst().isValidACK()){
+                System.out.print(getFirst().getSeqNum()+"; ");
                 removeFirst();
             }
+            System.out.println();
+            
         }
+        
 
     }
 

@@ -6,6 +6,9 @@ package src;
  Autoren:
  */
 import java.io.*;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,22 +69,31 @@ public class FileCopyClient extends Thread {
      */
     private void runFileCopyClient() {
 
+        DatagramSocket clientSocket = null;
         sendePuffer = new Puffer(windowSize, this);
-        //sendePuffer.start();
+        try {
+            //sendePuffer.start();
+            clientSocket = new DatagramSocket(60000, InetAddress.getByName("127.0.0.1"));
+        } catch (Exception ex) {
+            Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex);
+        }
 
-        this.receiver = new UDPReceiver(sendePuffer);
+        this.receiver = new UDPReceiver(sendePuffer, clientSocket);
         receiver.start();
 
-        sender = new UDPSender();
+        sender = new UDPSender(clientSocket);
 
         // ToDo!!
         //Kontroll Paket senden
+
         FCpacket contFCpacket = makeControlPacket();
+
         sendePuffer.insert(contFCpacket);
         sendPackage(contFCpacket);
 
 
-        FCpacket nextPackage = getNextPackage(0);
+        FCpacket nextPackage = getNextPackage(1);
         while (!finish) {
             while (nextPackage != null) {
                 if (!sendePuffer.isFull()) {
@@ -91,11 +103,12 @@ public class FileCopyClient extends Thread {
                     finish = false;
                 } else {
                     finish = true;
-                    break;
                 }
             }
 
         }
+        System.err.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+        //receiver.stopJob();
     }
 
     private void sendPackage(FCpacket fcp) {
@@ -121,12 +134,12 @@ public class FileCopyClient extends Thread {
         byte[] data = new byte[UDP_PACKET_SIZE];
         int nextByte = -2;
         try {
-            System.out.println("data.length: " + data.length);
+//            System.out.println("data.length: " + data.length);
             System.out.println("seqNum: " + seqNum);
-            System.out.println("udp-pack-length: " + UDP_PACKET_SIZE);
+//            System.out.println("udp-pack-length: " + UDP_PACKET_SIZE);
 
             nextByte = inFromFile.read(data);
-            System.out.println(Arrays.toString(data));
+//            System.out.println(Arrays.toString(data));
         } catch (IOException ex) {
             Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println(ex.getStackTrace());
@@ -182,6 +195,7 @@ public class FileCopyClient extends Thread {
     public void computeTimeoutValue(long sampleRTT) {
         estimatedRTT = new Double((1 - X) * estimatedRTT + X * sampleRTT).longValue();
         timeoutValue = estimatedRTT + (4 * computeDeviation(sampleRTT));
+        System.out.println(String.format("estimatedRTT:%d timeout: %d",estimatedRTT,timeoutValue));
     }
 
     private long computeDeviation(long smapleRTT) {

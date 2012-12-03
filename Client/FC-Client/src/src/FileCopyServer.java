@@ -210,7 +210,7 @@ public class FileCopyServer {
 
 		// Extract parameters
 		parameterArray = parameters.split(";");
-                System.out.println(parameters);
+//                System.out.println(parameters);
 
 		if (parameterArray.length == 3) {
 			// Adjust parameters
