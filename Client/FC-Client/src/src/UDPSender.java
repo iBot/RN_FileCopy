@@ -4,8 +4,8 @@
  */
 package src;
 
-import java.net.*;
 import java.io.*;
+import java.net.*;
 
 /**
  *
@@ -48,7 +48,7 @@ public class UDPSender {
 //            System.out.println("data "+ new String(fcPacket.getData(),"UTF-8"));
             /* Paket erzeugen */
             DatagramPacket sendPacket =
-                    new DatagramPacket(fcPacket.getSeqNumBytesAndData(), fcPacket.getLen() + 8, serverIpAddress, serverPort);
+                    new DatagramPacket(fcPacket.getSeqNumBytesAndData(), fcPacket.getSeqNumBytesAndData().length, serverIpAddress, serverPort);
 
 
 //        System.out.println("data "+ new String(sendPacket.getData(),"UTF-8"));

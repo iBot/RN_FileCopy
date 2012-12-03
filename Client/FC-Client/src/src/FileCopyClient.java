@@ -19,6 +19,7 @@ public class FileCopyClient extends Thread {
     public final static boolean TEST_OUTPUT_MODE = true;
     public final int SERVER_PORT = 23000;
     public final int UDP_PACKET_SIZE = 1024;
+    private final int UDP_DATA_SIZE = UDP_PACKET_SIZE - 8;
     private final double X = 0.1;
     // -------- Public parms
     public String servername;
@@ -98,14 +99,20 @@ public class FileCopyClient extends Thread {
                 sendPackage(nextPackage);
                 nextPackage = getNextPackage(sendePuffer.getNextSeqNum());
             }
-            System.out.println("Next Package == null -> "+(nextPackage == null));
+            System.out.println("Next Package == null -> " + (nextPackage == null));
         }
         System.out.println("<<<ALLE PAKETE IM PUFFER>>>");
-        
-        while (!sendePuffer.isEmpty()){  
+
+        while (!sendePuffer.isEmpty()) {
         }
-        
+
         receiver.stopJob();
+        try {
+            inFromFile.close();
+        } catch (IOException ex) {
+            Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //System.exit(0);
     }
 
     private void sendPackage(FCpacket fcp) {
@@ -181,7 +188,9 @@ public class FileCopyClient extends Thread {
      */
     public void timeoutTask(long seqNum) {
         FCpacket fcp = sendePuffer.getPackageForSeqNum(seqNum);
-        sendPackage(fcp);
+        if (fcp != null) {
+            sendPackage(fcp);
+        }
     }
 
     /**

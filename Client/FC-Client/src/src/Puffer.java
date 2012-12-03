@@ -16,6 +16,7 @@ public class Puffer {
     private SortedSet<FCpacket> puffer;
     private final int pufferSize;
     private final FileCopyClient producer;
+    private long nextSeqNum;
     //private final UDPReceiver consumer;
 
     /**
@@ -27,6 +28,7 @@ public class Puffer {
         this.producer = producer;
         this.pufferSize = pufferSize;
         this.puffer = new TreeSet<>();
+        this.nextSeqNum =-1;
     }
 
 //    @Override
@@ -48,15 +50,15 @@ public class Puffer {
     public synchronized void ackPackage(long seqNumber) {
         
         FCpacket fcp = getPackageForSeqNum(seqNumber);
-        System.out.println("--Ack: "+fcp.getSeqNum());
         
         if (fcp != null) {
+            System.out.println("--Ack: "+fcp.getSeqNum());
             fcp.setValidACK(true);
             System.out.println("Puffer before; size : "+puffer.size()+" -> " + puffer);
             producer.cancelTimer(fcp);
             producer.computeTimeoutValue(System.currentTimeMillis()*1000000-fcp.getTimestamp());
             System.out.print("---Delete from Buffer: ");
-            while(getFirst().isValidACK()){
+            while(!isEmpty() && getFirst().isValidACK()){
                 System.out.print(getFirst().getSeqNum()+"; ");
                 removeFirst();
             }
@@ -88,9 +90,11 @@ public class Puffer {
      * @return Sequenznummer des nächsten zu sendenden Pakets
      */
     public synchronized long getNextSeqNum() {
-        FCpacket last = puffer.last();
-        System.out.println("NextSeqNum = "+(last.getSeqNum() + 1));
-        return last.getSeqNum() + 1;
+        return nextSeqNum;
+//        FCpacket last = puffer.last();
+//        System.out.println("NextSeqNum = "+(last.getSeqNum() + 1));
+//        return last.getSeqNum() + 1;
+
     }
 
     public synchronized FCpacket getPackageForSeqNum(long seqNum) {
@@ -100,12 +104,12 @@ public class Puffer {
                 result = fCpacket;
             }
         }
-        
         return result;
     }
 
     public synchronized void insert(FCpacket newPackage) {
         puffer.add(newPackage);
+        nextSeqNum = newPackage.getSeqNum()+1;
     }
 
     public synchronized boolean isEmpty() {
