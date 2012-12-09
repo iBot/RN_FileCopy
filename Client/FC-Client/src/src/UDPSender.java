@@ -6,6 +6,10 @@ package src;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,14 +20,15 @@ public class UDPSender {
     private DatagramSocket clientSocket;  // UDP-Socketklasse
     private InetAddress serverIpAddress;  // IP-Adresse des Zielservers
     private int serverPort;
-    
+    private List<Long> list = new ArrayList<Long>();
 
-    public UDPSender(DatagramSocket clientSocket){
+    public UDPSender(DatagramSocket clientSocket) {
         this.clientSocket = clientSocket;
     }
-    
+
     void sendPackage(FCpacket fcp, String serverName, int serverPort) {
         try {
+
             /* UDP-Socket erzeugen (kein Verbindungsaufbau!)
              * Socket wird an irgendeinen freien (Quell-)Port gebunden, da kein Port angegeben */
             //clientSocket = new DatagramSocket(60000, InetAddress.getByName("127.0.0.1"));
@@ -32,6 +37,7 @@ public class UDPSender {
 
             System.out.println("Sending Packet with Sequence Number " + fcp.getSeqNum());
             /* Sende den String als UDP-Paket zum Server */
+
             writeToServer(fcp);
             //System.out.println("DATA: "+new String(fcp.getData(), "UTF-8"));
             /* Socket schlie�en (freigeben)*/
@@ -49,7 +55,12 @@ public class UDPSender {
             /* Paket erzeugen */
             DatagramPacket sendPacket =
                     new DatagramPacket(fcPacket.getSeqNumBytesAndData(), fcPacket.getSeqNumBytesAndData().length, serverIpAddress, serverPort);
-
+         
+            if (fcPacket.getSeqNum() != 0) {
+    //            if (puffermethode(sendPacket)) {
+                    writefilelocal(fcPacket.getData() );
+    //            }
+            }
 
 //        System.out.println("data "+ new String(sendPacket.getData(),"UTF-8"));
             /* Senden des Pakets */
@@ -59,5 +70,32 @@ public class UDPSender {
             System.err.println(e.toString());
             System.out.println("Failed to send Packet with Sequence Number " + fcPacket.getSeqNum());
         }
+    }
+
+    private void writefilelocal(byte[] data) {
+        try {
+            FileCopyClient.outToFile.write(data);
+        } catch (IOException ex) {
+            Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private boolean puffermethode(DatagramPacket fcp) {
+        FCpacket fcReceivePacket = new FCpacket(fcp.getData(),
+                fcp.getLength());
+        if (list.contains(fcReceivePacket.getSeqNum())) {
+            return false;
+        }
+        list.add(fcReceivePacket.getSeqNum());
+        System.out.println("list size " + list.size());
+        return true;
+
+    }
+
+    private byte[] getdata(DatagramPacket fcp) {
+        FCpacket fcReceivePacket = new FCpacket(fcp.getData(),
+                fcp.getLength());
+        return fcReceivePacket.getData();
+
     }
 }

@@ -39,6 +39,7 @@ public class FileCopyClient extends Thread {
     // ... ToDo
     // -------- Streams
     private FileInputStream inFromFile;
+    public static FileOutputStream outToFile;
 
     // Constructor
     /**
@@ -58,6 +59,8 @@ public class FileCopyClient extends Thread {
         serverErrorRate = errorRateArg;
         try {
             inFromFile = new FileInputStream(sourcePath);
+            outToFile = new FileOutputStream("D:\\OrangeMan2.text");
+
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println(ex.getStackTrace());
@@ -97,9 +100,9 @@ public class FileCopyClient extends Thread {
             if (!sendePuffer.isFull()) {
                 sendePuffer.insert(nextPackage);
                 sendPackage(nextPackage);
+
                 nextPackage = getNextPackage(sendePuffer.getNextSeqNum());
             }
-            System.out.println("Next Package == null -> " + (nextPackage == null));
         }
         System.out.println("<<<ALLE PAKETE IM PUFFER>>>");
 
@@ -119,6 +122,7 @@ public class FileCopyClient extends Thread {
         fcp.setTimestamp(System.currentTimeMillis() * 1000000);
         fcp.setTimer(new FC_Timer(timeoutValue, this, fcp.getSeqNum()));
         startTimer(fcp);
+
         sender.sendPackage(fcp, servername, SERVER_PORT);
     }
 
@@ -139,12 +143,9 @@ public class FileCopyClient extends Thread {
         byte[] data = new byte[UDP_PACKET_SIZE];
         int nextByte = -2;
         try {
-//            System.out.println("data.length: " + data.length);
-            System.out.println("seqNum: " + seqNum);
-//            System.out.println("udp-pack-length: " + UDP_PACKET_SIZE);
 
             nextByte = inFromFile.read(data);
-//            System.out.println(Arrays.toString(data));
+
         } catch (IOException ex) {
             Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println(ex.getStackTrace());
@@ -202,7 +203,7 @@ public class FileCopyClient extends Thread {
     public void computeTimeoutValue(long sampleRTT) {
         estimatedRTT = new Double((1 - X) * estimatedRTT + X * sampleRTT).longValue();
         timeoutValue = estimatedRTT + (4 * computeDeviation(sampleRTT));
-        System.out.println(String.format("estimatedRTT:%d timeout: %d", estimatedRTT, timeoutValue));
+        //    System.out.println(String.format("estimatedRTT:%d timeout: %d", estimatedRTT, timeoutValue));
     }
 
     private long computeDeviation(long smapleRTT) {
@@ -271,5 +272,13 @@ public class FileCopyClient extends Thread {
         }
         FileCopyClient myClient = new FileCopyClient(hostname, fileSource, fileTarget, windowsSize, errorLevel);
         myClient.runFileCopyClient();
+    }
+    
+    private void writefilelocal(byte[] data) {
+        try {
+            FileCopyClient.outToFile.write(data);
+        } catch (IOException ex) {
+            Logger.getLogger(FileCopyClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

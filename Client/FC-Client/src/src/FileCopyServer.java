@@ -8,7 +8,6 @@ package src;
 
 import java.io.*;
 import java.net.*;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -189,7 +188,7 @@ public class FileCopyServer {
 
 		// Packet 0 is control packet --> don't write to file!
 		if (deliverPacket.getSeqNum() > 0) {
-			outToFile.write(deliverPacket.getData(), 0, deliverPacket.getLen());
+			outToFile.write(deliverPacket.getData());
 
 			testOut("Packet " + deliverPacket.getSeqNum()
 					+ " delivered! Block of length " + deliverPacket.getLen()
