@@ -16,9 +16,9 @@ import java.util.logging.Logger;
 public class FileCopyClient extends Thread {
 
     // -------- Constants
-    public final static boolean TEST_OUTPUT_MODE = true;
+    public final static boolean TEST_OUTPUT_MODE = false;
     public final int SERVER_PORT = 23000;
-    public final int UDP_PACKET_SIZE = 1024;
+    public final int UDP_PACKET_SIZE = 1016;
     private final int UDP_DATA_SIZE = UDP_PACKET_SIZE - 8;
     private final double X = 0.1;
     // -------- Public parms
@@ -104,7 +104,7 @@ public class FileCopyClient extends Thread {
                 nextPackage = getNextPackage(sendePuffer.getNextSeqNum());
             }
         }
-        System.out.println("<<<ALLE PAKETE IM PUFFER>>>");
+//        System.out.println("<<<ALLE PAKETE IM PUFFER>>>");
 
         while (!sendePuffer.isEmpty()) {
         }
@@ -271,7 +271,10 @@ public class FileCopyClient extends Thread {
             wrongArguments();
         }
         FileCopyClient myClient = new FileCopyClient(hostname, fileSource, fileTarget, windowsSize, errorLevel);
+        long startTime = System.currentTimeMillis();
         myClient.runFileCopyClient();
+        long endTime = System.currentTimeMillis();
+        System.out.println("Bearbeitungs-Zeit: "+(endTime-startTime));
     }
     
     private void writefilelocal(byte[] data) {

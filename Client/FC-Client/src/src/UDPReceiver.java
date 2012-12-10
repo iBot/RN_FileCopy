@@ -31,7 +31,7 @@ public class UDPReceiver extends Thread {
     public void run() {
 //        try {
 
-            System.out.println("UDP Reciver Thread is running until all Ack's Packets are received!");
+//            System.out.println("UDP Reciver Thread is running until all Ack's Packets are received!");
 
             /* UDP-Socket erzeugen (kein Verbindungsaufbau!)
              * Socket wird an irgendeinen freien (Quell-)Port gebunden, da kein Port angegeben */
@@ -39,7 +39,7 @@ public class UDPReceiver extends Thread {
 
             while (serviceRequested) {
                 seqNumber = readAckFromServer();
-                System.err.println("Received Ack for SeqNum: "+seqNumber);
+//                System.err.println("Received Ack for SeqNum: "+seqNumber);
                 puffer.ackPackage(seqNumber);
             }
 
@@ -49,7 +49,7 @@ public class UDPReceiver extends Thread {
 //            System.err.println(e.toString());
 //            System.exit(1);
 //        }
-        System.out.println("UDP Reciver Thread stopped!\n last Ack Packet has this Sequence Number: " + seqNumber);
+//        System.out.println("UDP Reciver Thread stopped!\n last Ack Packet has this Sequence Number: " + seqNumber);
     }
 
     public void stopJob() {
@@ -74,7 +74,7 @@ public class UDPReceiver extends Thread {
             System.err.println("Connection aborted by server!");
             serviceRequested = false;
         }
-        System.out.println("UDP Client got from Server: Packet with the number " + seqNumber + " recived successfully");
+//        System.out.println("UDP Client got from Server: Packet with the number " + seqNumber + " recived successfully");
         return seqNumber;
     }
 

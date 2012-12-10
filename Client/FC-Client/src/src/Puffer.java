@@ -29,6 +29,7 @@ public class Puffer {
         this.pufferSize = pufferSize;
         this.puffer = new TreeSet<>();
         this.nextSeqNum =-1;
+        
     }
 
 //    @Override
@@ -52,18 +53,18 @@ public class Puffer {
         FCpacket fcp = getPackageForSeqNum(seqNumber);
         
         if (fcp != null) {
-            System.out.println("--Ack: "+fcp.getSeqNum());
+//            System.out.println("--Ack: "+fcp.getSeqNum());
             fcp.setValidACK(true);
-            System.out.println("Puffer before; size : "+puffer.size()+" -> " + puffer);
+//            System.out.println("Puffer before; size : "+puffer.size()+" -> " + puffer);
             producer.cancelTimer(fcp);
             producer.computeTimeoutValue(System.currentTimeMillis()*1000000-fcp.getTimestamp());
-            System.out.print("---Delete from Buffer: ");
+//            System.out.print("---Delete from Buffer: ");
             while(!isEmpty() && getFirst().isValidACK()){
-                System.out.print(getFirst().getSeqNum()+"; ");
+//                System.out.print(getFirst().getSeqNum()+"; ");
                 removeFirst();
             }
-            System.out.println();
-            System.out.println("Puffer after; size : "+puffer.size()+" -> " + puffer);
+//            System.out.println();
+//            System.out.println("Puffer after; size : "+puffer.size()+" -> " + puffer);
         }
         
         

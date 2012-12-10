@@ -83,6 +83,9 @@ public class FileCopyServer {
 					// extract sequence number and data
 					fcReceivePacket = new FCpacket(udpReceivePacket.getData(),
 							udpReceivePacket.getLength());
+                                        
+//                                        System.out.println(fcReceivePacket.getSeqNum()+".length ->"+udpReceivePacket.getData().length);
+
 
 					long seqNum = fcReceivePacket.getSeqNum();
 
@@ -125,7 +128,7 @@ public class FileCopyServer {
 				}
 			} catch (java.net.SocketTimeoutException e) {
 				// Copy job successfully finished
-                                System.out.println(outToFile);
+//                                System.out.println(outToFile);
 				outToFile.close();
 				connectionEstablished = false;
 				System.out.println("Connection successfully closed, file "

@@ -35,7 +35,7 @@ public class UDPSender {
             serverIpAddress = InetAddress.getByName(serverName); // Zieladresse
             this.serverPort = serverPort;
 
-            System.out.println("Sending Packet with Sequence Number " + fcp.getSeqNum());
+//            System.out.println("Sending Packet with Sequence Number " + fcp.getSeqNum());
             /* Sende den String als UDP-Paket zum Server */
 
             writeToServer(fcp);
@@ -56,11 +56,13 @@ public class UDPSender {
             DatagramPacket sendPacket =
                     new DatagramPacket(fcPacket.getSeqNumBytesAndData(), fcPacket.getSeqNumBytesAndData().length, serverIpAddress, serverPort);
          
-            if (fcPacket.getSeqNum() != 0) {
-    //            if (puffermethode(sendPacket)) {
-                    writefilelocal(fcPacket.getData() );
-    //            }
-            }
+//            System.out.println(fcPacket.getSeqNum()+".length ->"+sendPacket.getData().length);
+            
+//            if (fcPacket.getSeqNum() != 0) {
+//    //            if (puffermethode(sendPacket)) {
+//                    writefilelocal(fcPacket.getData() );
+//    //            }
+//            }
 
 //        System.out.println("data "+ new String(sendPacket.getData(),"UTF-8"));
             /* Senden des Pakets */
