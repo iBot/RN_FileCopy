@@ -41,29 +41,15 @@ public class Puffer {
 //        }
 //    }
     public synchronized FCpacket getFirst() {
-        while (puffer.size() == 0) {
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
-        FCpacket result = puffer.first();
 
-        notifyAll();
-        return result;
+
+        return puffer.first();
     }
 
     public synchronized void removeFirst() {
-        while (puffer.size() == 0) {
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
-
+        if (puffer.size()>0){
         puffer.remove(puffer.first());
+        }
         notifyAll();
     }
 
