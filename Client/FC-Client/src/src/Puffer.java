@@ -28,8 +28,8 @@ public class Puffer {
         this.producer = producer;
         this.pufferSize = pufferSize;
         this.puffer = new TreeSet<>();
-        this.nextSeqNum =-1;
-        
+        this.nextSeqNum = -1;
+
     }
 
 //    @Override
@@ -41,34 +41,53 @@ public class Puffer {
 //        }
 //    }
     public synchronized FCpacket getFirst() {
-        return puffer.first();
+        while (puffer.size() == 0) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+        FCpacket result = puffer.first();
+
+        notifyAll();
+        return result;
     }
 
     public synchronized void removeFirst() {
+        while (puffer.size() == 0) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+
         puffer.remove(puffer.first());
+        notifyAll();
     }
 
     public synchronized void ackPackage(long seqNumber) {
-        
+
         FCpacket fcp = getPackageForSeqNum(seqNumber);
-        
+
         if (fcp != null) {
 //            System.out.println("--Ack: "+fcp.getSeqNum());
             fcp.setValidACK(true);
 //            System.out.println("Puffer before; size : "+puffer.size()+" -> " + puffer);
             producer.cancelTimer(fcp);
-            producer.computeTimeoutValue(System.currentTimeMillis()*1000000-fcp.getTimestamp());
+            producer.computeTimeoutValue(System.nanoTime() - fcp.getTimestamp());
 //            System.out.print("---Delete from Buffer: ");
-            while(!isEmpty() && getFirst().isValidACK()){
+            while (!isEmpty() && getFirst().isValidACK()) {
 //                System.out.print(getFirst().getSeqNum()+"; ");
                 removeFirst();
             }
 //            System.out.println();
 //            System.out.println("Puffer after; size : "+puffer.size()+" -> " + puffer);
         }
-        
-        
-        
+
+
+
 
     }
 
@@ -81,7 +100,7 @@ public class Puffer {
         return puffer.first().getSeqNum();
     }
 
-    public synchronized boolean isFull(){
+    public synchronized boolean isFull() {
         return puffer.size() >= pufferSize;
     }
 
@@ -109,11 +128,35 @@ public class Puffer {
     }
 
     public synchronized void insert(FCpacket newPackage) {
+        while (puffer.size() == pufferSize) {
+            try {
+                wait();
+             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
         puffer.add(newPackage);
-        nextSeqNum = newPackage.getSeqNum()+1;
+        nextSeqNum = newPackage.getSeqNum() + 1;
+
+        // Wartenden Producer/Consumer wecken
+        // Es m�ssen ALLE Threads geweckt werden, da es nur eine Wait-Queue gibt!
+        notifyAll();
     }
 
     public synchronized boolean isEmpty() {
         return puffer.isEmpty();
+    }
+
+    public synchronized void waitForEmptyPuffer() {
+
+        while (!puffer.isEmpty()) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+        notifyAll();
     }
 }
